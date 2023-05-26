@@ -4276,11 +4276,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "E:\\KANINI\\Lecture6-DotNet(c#)\\BigBang_Assessment(26-5-23)\\BigBang_Assessment(26-5-23).csproj",
+      "projectUniqueName": "E:\\big_bang_assessment\\BigBang_Assessment(26-5-23)\\BigBang_Assessment(26-5-23).csproj",
       "projectName": "BigBang_Assessment(26-5-23)",
-      "projectPath": "E:\\KANINI\\Lecture6-DotNet(c#)\\BigBang_Assessment(26-5-23)\\BigBang_Assessment(26-5-23).csproj",
+      "projectPath": "E:\\big_bang_assessment\\BigBang_Assessment(26-5-23)\\BigBang_Assessment(26-5-23).csproj",
       "packagesPath": "C:\\Users\\MayihS\\.nuget\\packages\\",
-      "outputPath": "E:\\KANINI\\Lecture6-DotNet(c#)\\BigBang_Assessment(26-5-23)\\obj\\",
+      "outputPath": "E:\\big_bang_assessment\\BigBang_Assessment(26-5-23)\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

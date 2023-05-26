@@ -1,7 +1,6 @@
-﻿using BigBang_Assessment_26_5_23_.Models;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
-namespace BigBang_Assessment_26_5_23_.Controllers
+namespace BigBang_Assessment_26_5_23_.Models
 {
     public class HotelAddress
     {
