@@ -14,15 +14,15 @@ namespace BigBang_Assessment_26_5_23_.Repositories
         Task<HotelResponse> GetHotelById(int id);
         Task<HotelResponse> PostHotel(string hotelName);
         Task<HotelResponse> PutHotel(string id, string name);
-        Task<HotelResponse> DeleteHotel();
+        Task<HotelResponse> DeleteHotel(string id);
 
 
 
 
-        Task<HotelResponse> GetAddress();
-        Task<HotelResponse> GetAddressById(int id);
-        Task<HotelResponse> PostAddress();
-        Task<HotelResponse> PutAddress();
-        Task<HotelResponse> DeleteAddress();
+        Task<AddressResponse> GetAddress();
+        Task<AddressResponse> GetAddressById(int id);
+        Task<AddressResponse> PostAddress(AddressRequest address);
+        Task<AddressResponse> PutAddress(int id);
+        Task<AddressResponse> DeleteAddress(int id);
     }
 }

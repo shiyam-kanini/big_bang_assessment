@@ -125,7 +125,7 @@ namespace BigBang_Assessment_26_5_23_.Repositories
             HotelResponse result = new HotelResponse();
             if(hotels.Count <= 0)
             {
-                result.Success = false;
+                result.Success = true;
                 result.Message = "No Records Found";
                 result.Hotels= hotels;
                 return result;
@@ -158,7 +158,7 @@ namespace BigBang_Assessment_26_5_23_.Repositories
             try
             {
                 List<XYZHotels> hotelExists = await _context.Hotels.Where(x => x.HotelName == hotelName).ToListAsync();
-                if (hotelExists.Count <= 0)
+                if (hotelExists.Count > 0)
                 {
                     postResponse = new HotelResponse()
                     {
@@ -173,6 +173,7 @@ namespace BigBang_Assessment_26_5_23_.Repositories
                     HotelId = $"XYZ{random.Next(0, 9)}",
                     HotelName = hotelName,
                 };
+                
                 hotelExists.Add(newHotel);
                 postResponse = new HotelResponse()
                 {
@@ -180,6 +181,8 @@ namespace BigBang_Assessment_26_5_23_.Repositories
                     Message = "Hotel Added",
                     Hotels = hotelExists,
                 };
+                await _context.Hotels.AddAsync(newHotel);
+                await _context.SaveChangesAsync();
                 return postResponse;
             }
             catch(Exception ex)
@@ -197,79 +200,202 @@ namespace BigBang_Assessment_26_5_23_.Repositories
         public async Task<HotelResponse> PutHotel(string id, string name)
         {
             List<XYZHotels> hotels = new List<XYZHotels>();
-            HotelResponse postResponse;
+            HotelResponse putResponse;
             try
             {
                 XYZHotels hotelExists = await _context.Hotels.FindAsync(id);
                 if (hotelExists == null)
                 {
                     hotels.Add(hotelExists);
-                    postResponse = new HotelResponse()
+                    putResponse = new HotelResponse()
                     {
                         Success = false,
                         Message = "Hotel doesnt Exists",
                         Hotels = hotels,
                     };
-                    return postResponse;
+                    return putResponse;
                 }
                 
                 XYZHotels newHotel = new XYZHotels()
                 {
-                    HotelId = $"XYZ{random.Next(0, 9)}",
+                    HotelId = id,
                     HotelName = name,
                 };
                 hotels.Add(newHotel);
                 
-                postResponse = new HotelResponse()
+                putResponse = new HotelResponse()
                 {
                     Success = true,
-                    Message = "Hotel Added",
+                    Message = $"{await _context.Hotels.Where(x => x.HotelId.Equals(id)).Select(y => y.HotelName).FirstOrDefaultAsync()} has been changed to {name}",
                     Hotels = hotels,
                 };
+                _context.Hotels.Update(newHotel);
+                await _context.SaveChangesAsync();
+                return putResponse;
+            }
+            catch (Exception ex)
+            {
+                putResponse = new HotelResponse()
+                {
+                    Success = false,
+                    Message = ex.StackTrace,
+                    Hotels = null,
+                };
+                return putResponse;
+            }
+        }
+
+        public async Task<HotelResponse> DeleteHotel(string id)
+        {
+            List<XYZHotels> hotels = new List<XYZHotels>();
+            HotelResponse deleteResponse;
+            try
+            {
+                XYZHotels hotelExists = await _context.Hotels.FindAsync(id);
+                if (hotelExists == null)
+                {
+                    hotels.Add(hotelExists);
+                    deleteResponse = new HotelResponse()
+                    {
+                        Success = false,
+                        Message = "Hotel doesnt Exists",
+                        Hotels = hotels,
+                    };
+                    return deleteResponse;
+                }                
+                hotels.Add(hotelExists);
+                _context.Hotels.Where(x => x.HotelId.Equals(id)).ExecuteDelete();
+                await _context.SaveChangesAsync();
+                deleteResponse = new HotelResponse()
+                {
+                    Success = true,
+                    Message = $"{await _context.Hotels.Where(x => x.HotelId.Equals(id)).Select(y => y.HotelName).FirstOrDefaultAsync()} has been Deleted",
+                    Hotels = hotels,
+                };
+               return deleteResponse;
+            }
+            catch (Exception ex)
+            {
+                deleteResponse = new HotelResponse()
+                {
+                    Success = false,
+                    Message = ex.StackTrace,
+                    Hotels = null,
+                };
+                return deleteResponse;
+            }
+        }
+
+
+        
+        public Task<AddressResponse> PutAddress(int id)
+        {
+            throw new NotImplementedException();
+        }
+        public Task<AddressResponse> DeleteAddress(int id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<AddressResponse> GetAddress()
+        {
+            AddressResponse result = new AddressResponse();
+            try
+            {
+                var hotels = _context.HotelAddresses.ToList();
+                if (hotels.Count <= 0)
+                {
+                    result.Success = true;
+                    result.Message = "No Records Found";
+                    result.HotelAddress = hotels;
+                    return result;
+                }
+                result.Success = true;
+                result.Message = $"{hotels.Count} records found";
+                result.HotelAddress = hotels;
+                return result;
+            }
+            catch(Exception ex)
+            {
+                result.Success = false;
+                result.Message = ex.Message;
+                result.HotelAddress = null;
+                return result;
+            }
+        }
+
+        public async Task<AddressResponse> GetAddressById(int id)
+        {
+            AddressResponse result = new AddressResponse();
+            try
+            {
+                var address = await _context.HotelAddresses.Where(id => id.HotelAddressId.Equals(id)).ToListAsync();
+                if (address.Count <= 0)
+                {
+                    result.Success = false;
+                    result.Message = "No Records Found";
+                    result.HotelAddress = address;
+                    return result;
+                }
+                result.Success = true;
+                result.Message = $"{address.Count} records found";
+                result.HotelAddress = address;
+                return result;
+            }
+            catch(Exception ex)
+            {
+                result.Success = false;
+                result.Message = ex.Message;
+                result.HotelAddress = null; return result;
+            }
+        }
+
+        public async Task<AddressResponse> PostAddress(AddressRequest address)
+        {
+            AddressResponse postResponse;
+            try
+            {
+                List<HotelAddress> addressExists = await _context.HotelAddresses.Where(x => x.City == address.City).ToListAsync();
+                if (addressExists.Count > 0)
+                {
+                    postResponse = new AddressResponse()
+                    {
+                        Success = false,
+                        Message = "Hotel Exists in the same city ",
+                        HotelAddress = addressExists,
+                    };
+                    return postResponse;
+                }
+                HotelAddress newAddress = new HotelAddress()
+                {
+                    HotelAddressId = $"AID{random.Next(0, 9)}{random.Next(0, 9)}{random.Next(0, 9)}",
+                    City = address.City,
+                    StreetName= address.StreetName,
+                    Pincode= address.Pincode,
+                    Hotel = await _context.Hotels.FindAsync(address.HotelId),
+                };
+
+                addressExists.Add(newAddress);
+                postResponse = new AddressResponse()
+                {
+                    Success = true,
+                    Message = "Address Added",
+                    HotelAddress = addressExists,
+                };
+                await _context.HotelAddresses.AddAsync(newAddress);
+                await _context.SaveChangesAsync();
                 return postResponse;
             }
             catch (Exception ex)
             {
-                postResponse = new HotelResponse()
+                postResponse = new AddressResponse()
                 {
                     Success = true,
                     Message = ex.Message,
-                    Hotels = null,
+                    HotelAddress = null,
                 };
                 return postResponse;
             }
-        }
-
-        public Task<HotelResponse> DeleteHotel()
-        {
-            throw new NotImplementedException();
-        }
-
-        
-
-        public Task<HotelResponse> PutAddress()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<HotelResponse> DeleteAddress()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<HotelResponse> GetAddress()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<HotelResponse> GetAddressById(int id)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<HotelResponse> PostAddress()
-        {
-            throw new NotImplementedException();
         }
     }
 }
