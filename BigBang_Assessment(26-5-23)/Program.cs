@@ -1,6 +1,9 @@
 using BigBang_Assessment_26_5_23_.Models;
 using BigBang_Assessment_26_5_23_.Repositories;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 internal class Program
 {
@@ -22,6 +25,38 @@ internal class Program
                 options => options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
 
 
+        builder.Services.AddCors(options =>
+        {
+            options.AddPolicy("MyPolicy",
+                builder =>
+                {
+                    builder.AllowAnyOrigin()
+                           .AllowAnyMethod()
+                           .AllowAnyHeader();
+                });
+        });
+
+        builder.Services.AddAuthentication(options =>
+        {
+            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+        })
+             .AddJwtBearer(options =>
+             {
+                 options.SaveToken = true;
+                 options.RequireHttpsMetadata = false;
+                 options.TokenValidationParameters = new TokenValidationParameters()
+                 {
+                     ValidateIssuer = true,
+                     ValidateAudience = true,
+                     ValidAudience = builder.Configuration["JWT:ValidAudience"],
+                     ValidIssuer = builder.Configuration["JWT:ValidIssuer"],
+                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Key"]))
+                 };
+             });
+
+
         var app = builder.Build();
 
         // Configure the HTTP request pipeline.
@@ -33,9 +68,14 @@ internal class Program
 
         app.UseHttpsRedirection();
 
+        app.UseCors("MyPolicy");
+
         app.UseAuthentication();
 
+
         app.UseAuthorization();
+
+
 
         app.MapControllers();
 

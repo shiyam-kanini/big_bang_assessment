@@ -8,22 +8,22 @@ namespace BigBang_Assessment_26_5_23_.Controllers
     [Route("[controller]/actions")]
     public class AuthenticateController : ControllerBase
     {
-        private readonly IRepoXYZ? repoContext;
-        public AuthenticateController(IRepoXYZ? repoContext)
+        private readonly IRepoXYZ repoContext;
+        public AuthenticateController(IRepoXYZ repoContext)
         {
             this.repoContext = repoContext;
         }
         [HttpPost]
-        public async Task<ActionResult<string>> Register(RegisterModel userCredentials)
+        [Route("Register")]
+        public async Task<ActionResult<Commonresponse>> Register(RegisterModel userCredentials)
         {
-
             return await repoContext.Register(userCredentials);
         }
         [HttpPost]
-        public async Task<ActionResult<string>> Login(RegisterModel userCredentials)
+        [Route("Login")]
+        public async Task<ActionResult<Commonresponse>> Login(LoginRequest userCredentials)
         {
-
-            return await repoContext.Register(userCredentials);
+            return await repoContext.Login(userCredentials);
         }
     }
 }

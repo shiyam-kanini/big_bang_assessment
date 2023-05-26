@@ -11,5 +11,10 @@ namespace BigBang_Assessment_26_5_23_.Models
         public ICollection<HotelAddress>? HotelAddresses { get; set; }
         public ICollection<Employee_XYZHotels>? Employee_XYZHotels { get; set; }
         public ICollection<Rooms>? Rooms { get; set; }
+
+        public static implicit operator List<object>(XYZHotels? v)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
