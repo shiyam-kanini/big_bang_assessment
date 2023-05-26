@@ -6,6 +6,7 @@ using System.Linq.Expressions;
 using System.Reflection.Metadata.Ecma335;
 using System.Security.Cryptography;
 using System.Text;
+using System;
 
 namespace BigBang_Assessment_26_5_23_.Repositories
 {
@@ -26,7 +27,7 @@ namespace BigBang_Assessment_26_5_23_.Repositories
                 passwordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
             }
         }
-        public async Task<string> Register(RegisterModel? loginCredentials)
+        public async Task<string> Register([System.Diagnostics.CodeAnalysis.NotNull] RegisterModel? loginCredentials)
         {
             try
             {
@@ -38,18 +39,17 @@ namespace BigBang_Assessment_26_5_23_.Repositories
                 {
                     return "UserName Exists";
                 }
-                else
-                {
-                    return "";
-                }
+                
                 User newUser = new User()
                 {
                     UserId = $"UID{random.Next(0, 9)}{random.Next(0, 9)}{random.Next(0, 9)}",
                     UserName = loginCredentials.UserName,
-                    //UserPasswordHash = passwordHash,
-
-                    
+                    UserPasswordHash = passwordHash,
+                    UserPasswordSalt= passwordSalt                    
                 };
+                await _context.Users.AddAsync(newUser);
+                await _context.SaveChangesAsync();
+                return "User Rgistered Proceed to Login";
             }
             catch (Exception ex)
             {

@@ -13,11 +13,17 @@ namespace BigBang_Assessment_26_5_23_.Controllers
         {
             this.repoContext = repoContext;
         }
-        [HttpGet]
-        public async Task<ActionResult> Register(RegisterModel userCredentials)
+        [HttpPost]
+        public async Task<ActionResult<string>> Register(RegisterModel userCredentials)
         {
 
-            return Ok();
+            return await repoContext.Register(userCredentials);
+        }
+        [HttpPost]
+        public async Task<ActionResult<string>> Login(RegisterModel userCredentials)
+        {
+
+            return await repoContext.Register(userCredentials);
         }
     }
 }
