@@ -18,6 +18,8 @@ internal class Program
         builder.Services.AddSwaggerGen();
 
         builder.Services.AddScoped<IRepoXYZ, RepoXYZ>();
+        builder.Services.AddScoped<IRepoAddress, RepoAddress>();
+        builder.Services.AddScoped<IRepoRooms, RepoRooms>();
 
         builder.Services.AddDbContext<XYZHotelDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("connection")));
 

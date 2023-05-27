@@ -8,6 +8,7 @@ namespace BigBang_Assessment_26_5_23_.Controllers
 {
     [ApiController]
     [Route("[controller]/actions")]
+    [Authorize(Roles = "User")]
     public class HotelController : Controller
     {
         private readonly IRepoXYZ repoContext;
@@ -22,7 +23,7 @@ namespace BigBang_Assessment_26_5_23_.Controllers
             return await repoContext.GetHotels();
         }
         [HttpGet("id")]
-        public async Task<HotelResponse> GetHotelsById(int id)
+        public async Task<HotelResponse> GetHotelsById(string id)
         {
             return await repoContext.GetHotelById(id);
         }

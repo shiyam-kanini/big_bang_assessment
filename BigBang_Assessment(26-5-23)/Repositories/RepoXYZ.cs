@@ -11,12 +11,14 @@ using System.Security.Claims;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.AspNetCore.Http.HttpResults;
+using System.Diagnostics.CodeAnalysis;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BigBang_Assessment_26_5_23_.Repositories
 {
     public class RepoXYZ : IRepoXYZ
     {
-        private readonly Random? random = new Random();
+        private readonly Random random = new();
         private readonly XYZHotelDbContext _context;
         private readonly IConfiguration configuration;
         public RepoXYZ(XYZHotelDbContext context, IConfiguration configuration)
@@ -24,22 +26,22 @@ namespace BigBang_Assessment_26_5_23_.Repositories
             _context = context;
             this.configuration = configuration;
         }
-        public async Task<Commonresponse> Register([System.Diagnostics.CodeAnalysis.NotNull] RegisterModel loginCredentials)
+        public async Task<Commonresponse> Register( RegisterModel loginCredentials)
         {
-            Commonresponse registerResponse = new Commonresponse();
+            Commonresponse registerResponse = new();
             try
             {
                 byte[] passwordHash;
                 byte[] passwordSalt;
-                CreatePasswordHash(loginCredentials.Password, out passwordHash, out passwordSalt);
-                User isUserExists = await _context.Users.Where(name => name.UserName == loginCredentials.UserName).FirstOrDefaultAsync();
+                CreatePasswordHash(loginCredentials.Password ?? "", out passwordHash, out passwordSalt);
+                User? isUserExists = await _context.Users.Where(name => (name.UserName ?? "") == (loginCredentials.UserName ?? "")).FirstOrDefaultAsync();
                 if (isUserExists != null)
                 {
                     registerResponse.status = false;
                     registerResponse.message = "User Already Exists";
                     return registerResponse;
                 }                
-                User newUser = new User()
+                User newUser = new()
                 {
                     UserId = $"UID{random.Next(0, 9)}{random.Next(0, 9)}{random.Next(0, 9)}",
                     UserName = loginCredentials.UserName,
@@ -59,19 +61,21 @@ namespace BigBang_Assessment_26_5_23_.Repositories
                 return registerResponse;
             }            
         }
-        public async Task<Commonresponse> Login([System.Diagnostics.CodeAnalysis.NotNull] LoginRequest? loginCredentials)
+        public async Task<Commonresponse> Login([System.Diagnostics.CodeAnalysis.NotNull] LoginRequest loginCredentials)
         {
-            Commonresponse loginResponse = new Commonresponse();
+            Commonresponse loginResponse = new();
             try
             {
-                User isUserExists = await _context.Users.FindAsync(loginCredentials.UserId);
+                User? isUserExists = await _context.Users.FindAsync(loginCredentials.UserId ?? "");
                 if (isUserExists == null)
                 {
                     loginResponse.status = false;
                     loginResponse.message = "User Not Found";
                     return loginResponse;
                 }
-                Login_Logs newUser = new Login_Logs()
+                loginResponse.token = CreatToken(loginCredentials);
+
+                Login_Logs newUser = new()
                 {
                     SessionId = $"SID{random.Next(0, 9)}{random.Next(0, 9)}{random.Next(0, 9)}",
                     LoginId = loginCredentials.UserId,
@@ -80,7 +84,6 @@ namespace BigBang_Assessment_26_5_23_.Repositories
                 await _context.SaveChangesAsync();
                 loginResponse.status = true;
                 loginResponse.message = $"{newUser.LoginId} Logged in a session {newUser.SessionId}";
-                loginResponse.token = CreatToken(loginCredentials);
                 return loginResponse;
             }
             catch (Exception ex)
@@ -91,7 +94,6 @@ namespace BigBang_Assessment_26_5_23_.Repositories
             }
         }
         
-        Login_Logs currLogger = new Login_Logs();
 
         public void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordKey)
         {
@@ -105,7 +107,8 @@ namespace BigBang_Assessment_26_5_23_.Repositories
         {
             List<Claim> claims = new List<Claim>
             {
-                new Claim(ClaimTypes.Name, loginCredentials.UserId),
+                new Claim(ClaimTypes.Name, loginCredentials.UserId ?? ""),
+                new Claim(ClaimTypes.Role, "User"),
             };
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration.GetSection("AppSetting:Token").Value!));
             var cred = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
@@ -118,11 +121,10 @@ namespace BigBang_Assessment_26_5_23_.Repositories
             var jwt = new JwtSecurityTokenHandler().WriteToken(token);
             return jwt;
         }
-
         public async Task<HotelResponse> GetHotels()
         {
-            var hotels = _context.Hotels.ToList();
-            HotelResponse result = new HotelResponse();
+            var hotels = await _context.Hotels.Include(x => x.HotelAddresses).Include(y => y.Employee_XYZHotels).Include(z => z.Rooms).ToListAsync();
+            HotelResponse result = new();
             if(hotels.Count <= 0)
             {
                 result.Success = true;
@@ -135,10 +137,10 @@ namespace BigBang_Assessment_26_5_23_.Repositories
             result.Hotels = hotels;
             return result;
         }
-        public async Task<HotelResponse> GetHotelById(int id)
+        public async Task<HotelResponse> GetHotelById(string id)
         {
-            var hotels = await _context.Hotels.Where(id => id.HotelId.Equals(id)).ToListAsync();
-            HotelResponse result = new HotelResponse();
+            var hotels = await _context.Hotels.Where(id => (id.HotelId != null ? id.HotelId : "").Equals(id)).ToListAsync();
+            HotelResponse result = new();
             if (hotels.Count <= 0)
             {
                 result.Success = false;
@@ -168,7 +170,7 @@ namespace BigBang_Assessment_26_5_23_.Repositories
                     };
                     return postResponse;
                 }
-                XYZHotels newHotel = new XYZHotels()
+                XYZHotels newHotel = new()
                 {
                     HotelId = $"XYZ{random.Next(0, 9)}",
                     HotelName = hotelName,
@@ -191,7 +193,7 @@ namespace BigBang_Assessment_26_5_23_.Repositories
                 {
                     Success = true,
                     Message = ex.Message,
-                    Hotels = null,
+                    Hotels = new List<XYZHotels>(),
                 };
                 return postResponse;
             }
@@ -199,14 +201,14 @@ namespace BigBang_Assessment_26_5_23_.Repositories
 
         public async Task<HotelResponse> PutHotel(string id, string name)
         {
-            List<XYZHotels> hotels = new List<XYZHotels>();
+            List<XYZHotels> hotels = new();
             HotelResponse putResponse;
             try
             {
-                XYZHotels hotelExists = await _context.Hotels.FindAsync(id);
+                XYZHotels? hotelExists = await _context.Hotels.FindAsync(id);
                 if (hotelExists == null)
                 {
-                    hotels.Add(hotelExists);
+                    //hotels.Add(hotelExists);
                     putResponse = new HotelResponse()
                     {
                         Success = false,
@@ -216,7 +218,7 @@ namespace BigBang_Assessment_26_5_23_.Repositories
                     return putResponse;
                 }
                 
-                XYZHotels newHotel = new XYZHotels()
+                XYZHotels newHotel = new()
                 {
                     HotelId = id,
                     HotelName = name,
@@ -226,7 +228,7 @@ namespace BigBang_Assessment_26_5_23_.Repositories
                 putResponse = new HotelResponse()
                 {
                     Success = true,
-                    Message = $"{await _context.Hotels.Where(x => x.HotelId.Equals(id)).Select(y => y.HotelName).FirstOrDefaultAsync()} has been changed to {name}",
+                    Message = $"{await _context.Hotels.Where(x => (x.HotelId != null ? x.HotelId : "").Equals(id)).Select(y => y.HotelName).FirstOrDefaultAsync()} has been changed to {name}",
                     Hotels = hotels,
                 };
                 _context.Hotels.Update(newHotel);
@@ -238,7 +240,7 @@ namespace BigBang_Assessment_26_5_23_.Repositories
                 putResponse = new HotelResponse()
                 {
                     Success = false,
-                    Message = ex.StackTrace,
+                    Message = ex.Message,
                     Hotels = null,
                 };
                 return putResponse;
@@ -251,10 +253,10 @@ namespace BigBang_Assessment_26_5_23_.Repositories
             HotelResponse deleteResponse;
             try
             {
-                XYZHotels hotelExists = await _context.Hotels.FindAsync(id);
+                XYZHotels? hotelExists = await _context.Hotels.FindAsync(id);
                 if (hotelExists == null)
                 {
-                    hotels.Add(hotelExists);
+                    //hotels.Add(null);
                     deleteResponse = new HotelResponse()
                     {
                         Success = false,
@@ -264,12 +266,12 @@ namespace BigBang_Assessment_26_5_23_.Repositories
                     return deleteResponse;
                 }                
                 hotels.Add(hotelExists);
-                _context.Hotels.Where(x => x.HotelId.Equals(id)).ExecuteDelete();
+                _context.Hotels.Where(x => (x.HotelId != null ? x.HotelId : "").Equals(id)).ExecuteDelete();
                 await _context.SaveChangesAsync();
                 deleteResponse = new HotelResponse()
                 {
                     Success = true,
-                    Message = $"{await _context.Hotels.Where(x => x.HotelId.Equals(id)).Select(y => y.HotelName).FirstOrDefaultAsync()} has been Deleted",
+                    Message = $"{await _context.Hotels.Where(x => (x.HotelId != null ? x.HotelId : "").Equals(id)).Select(y => y.HotelName).FirstOrDefaultAsync()} has been Deleted",
                     Hotels = hotels,
                 };
                return deleteResponse;
@@ -279,7 +281,7 @@ namespace BigBang_Assessment_26_5_23_.Repositories
                 deleteResponse = new HotelResponse()
                 {
                     Success = false,
-                    Message = ex.StackTrace,
+                    Message = ex.Message,
                     Hotels = null,
                 };
                 return deleteResponse;
@@ -288,114 +290,6 @@ namespace BigBang_Assessment_26_5_23_.Repositories
 
 
         
-        public Task<AddressResponse> PutAddress(int id)
-        {
-            throw new NotImplementedException();
-        }
-        public Task<AddressResponse> DeleteAddress(int id)
-        {
-            throw new NotImplementedException();
-        }
-
-        public async Task<AddressResponse> GetAddress()
-        {
-            AddressResponse result = new AddressResponse();
-            try
-            {
-                var hotels = _context.HotelAddresses.ToList();
-                if (hotels.Count <= 0)
-                {
-                    result.Success = true;
-                    result.Message = "No Records Found";
-                    result.HotelAddress = hotels;
-                    return result;
-                }
-                result.Success = true;
-                result.Message = $"{hotels.Count} records found";
-                result.HotelAddress = hotels;
-                return result;
-            }
-            catch(Exception ex)
-            {
-                result.Success = false;
-                result.Message = ex.Message;
-                result.HotelAddress = null;
-                return result;
-            }
-        }
-
-        public async Task<AddressResponse> GetAddressById(int id)
-        {
-            AddressResponse result = new AddressResponse();
-            try
-            {
-                var address = await _context.HotelAddresses.Where(id => id.HotelAddressId.Equals(id)).ToListAsync();
-                if (address.Count <= 0)
-                {
-                    result.Success = false;
-                    result.Message = "No Records Found";
-                    result.HotelAddress = address;
-                    return result;
-                }
-                result.Success = true;
-                result.Message = $"{address.Count} records found";
-                result.HotelAddress = address;
-                return result;
-            }
-            catch(Exception ex)
-            {
-                result.Success = false;
-                result.Message = ex.Message;
-                result.HotelAddress = null; return result;
-            }
-        }
-
-        public async Task<AddressResponse> PostAddress(AddressRequest address)
-        {
-            AddressResponse postResponse;
-            try
-            {
-                List<HotelAddress> addressExists = await _context.HotelAddresses.Where(x => x.City == address.City).ToListAsync();
-                if (addressExists.Count > 0)
-                {
-                    postResponse = new AddressResponse()
-                    {
-                        Success = false,
-                        Message = "Hotel Exists in the same city ",
-                        HotelAddress = addressExists,
-                    };
-                    return postResponse;
-                }
-                HotelAddress newAddress = new HotelAddress()
-                {
-                    HotelAddressId = $"AID{random.Next(0, 9)}{random.Next(0, 9)}{random.Next(0, 9)}",
-                    City = address.City,
-                    StreetName= address.StreetName,
-                    Pincode= address.Pincode,
-                    Hotel = await _context.Hotels.FindAsync(address.HotelId),
-                };
-
-                addressExists.Add(newAddress);
-                postResponse = new AddressResponse()
-                {
-                    Success = true,
-                    Message = "Address Added",
-                    HotelAddress = addressExists,
-                };
-                await _context.HotelAddresses.AddAsync(newAddress);
-                await _context.SaveChangesAsync();
-                return postResponse;
-            }
-            catch (Exception ex)
-            {
-                postResponse = new AddressResponse()
-                {
-                    Success = true,
-                    Message = ex.Message,
-                    HotelAddress = null,
-                };
-                return postResponse;
-            }
-        }
+        
     }
 }

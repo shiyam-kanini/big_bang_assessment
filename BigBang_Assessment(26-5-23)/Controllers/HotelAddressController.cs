@@ -9,8 +9,8 @@ namespace BigBang_Assessment_26_5_23_.Controllers
     [Route("[controller]/actions")]
     public class HotelAddressController : Controller
     {
-        private readonly IRepoXYZ repoContext;
-        public HotelAddressController(IRepoXYZ repoContext)
+        private readonly IRepoAddress repoContext;
+        public HotelAddressController(IRepoAddress repoContext)
         {
             this.repoContext = repoContext;
         }
@@ -21,7 +21,7 @@ namespace BigBang_Assessment_26_5_23_.Controllers
             return await repoContext.GetAddress();
         }
         [HttpGet("id")]
-        public async Task<AddressResponse> GetHotelAddressById(int id)
+        public async Task<AddressResponse> GetHotelAddressById(string id)
         {
             return await repoContext.GetAddressById(id);
         }
@@ -31,15 +31,14 @@ namespace BigBang_Assessment_26_5_23_.Controllers
             return await repoContext.PostAddress(Address);
         }
         [HttpPut("ID")]
-        public async Task<ActionResult<HotelResponse>> EditHotels(string id, string name)
+        public async Task<AddressResponse> PutAddress(string id,AddressRequest Address)
         {
-
-            return await repoContext.PutHotel(id, name);
+            return await repoContext.PutAddress(id,Address);
         }
         [HttpDelete("ID")]
-        public async Task<ActionResult<HotelResponse>> DeleteAddress(string id)
+        public async Task<AddressResponse> DeleteAddress(string id)
         {
-            return await repoContext.DeleteHotel(id);
+            return await repoContext.DeleteAddress(id);
         }
 
     }

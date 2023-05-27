@@ -11,7 +11,7 @@ namespace BigBang_Assessment_26_5_23_.Repositories
         string CreatToken(LoginRequest loginCredentials);
 
         Task<HotelResponse> GetHotels();
-        Task<HotelResponse> GetHotelById(int id);
+        Task<HotelResponse> GetHotelById(string id);
         Task<HotelResponse> PostHotel(string hotelName);
         Task<HotelResponse> PutHotel(string id, string name);
         Task<HotelResponse> DeleteHotel(string id);
@@ -19,10 +19,6 @@ namespace BigBang_Assessment_26_5_23_.Repositories
 
 
 
-        Task<AddressResponse> GetAddress();
-        Task<AddressResponse> GetAddressById(int id);
-        Task<AddressResponse> PostAddress(AddressRequest address);
-        Task<AddressResponse> PutAddress(int id);
-        Task<AddressResponse> DeleteAddress(int id);
+        
     }
 }
