@@ -12,6 +12,7 @@ namespace BigBang_Assessment_26_5_23_.Models
         public string? EmployeeDOB { get; set; }
         public string? EmployeeQualifications { get; set; }
         public byte[]? EmployeePasswordHash { get; set; }
-        public byte[]? EmployeePasswordSalt { get;set; }        
+        public byte[]? EmployeePasswordSalt { get;set; }   
+        public ICollection<Employee_XYZHotels> Employee_XYZHotels { get;set; }
     }
 }

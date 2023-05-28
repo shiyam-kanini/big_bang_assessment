@@ -3,27 +3,27 @@ using BigBang_Assessment_26_5_23_.Models;
 using BigBang_Assessment_26_5_23_.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Data;
 
 namespace BigBang_Assessment_26_5_23_.Controllers
 {
     [ApiController]
     [Route("[controller]/actions")]
-    [Authorize(Roles = "User")]
     public class HotelController : Controller
     {
-        private readonly IRepoXYZ repoContext;
-        public HotelController(IRepoXYZ repoContext)
+        private readonly IRepoHotel repoContext;
+        public HotelController(IRepoHotel repoContext)
         {
             this.repoContext = repoContext;
         }
         [HttpGet]
         public async Task<HotelResponse> GetHotels() 
         {
-
             return await repoContext.GetHotels();
         }
         [HttpGet("id")]
-        public async Task<HotelResponse> GetHotelsById(string id)
+/*        [Authorize(Roles = "user")]
+*/        public async Task<HotelResponse> GetHotelsById(string id)
         {
             return await repoContext.GetHotelById(id);
         }
@@ -35,7 +35,6 @@ namespace BigBang_Assessment_26_5_23_.Controllers
         [HttpPut("ID")]
         public async Task<ActionResult<HotelResponse>> EditHotels(string id, string name)
         {
-
             return await repoContext.PutHotel(id, name) ;
         }
         [HttpDelete("ID")]

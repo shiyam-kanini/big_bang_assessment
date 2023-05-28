@@ -90,7 +90,7 @@ namespace BigBang_Assessment_26_5_23_.Repositories
         {
             try
             {
-                rooms = await _context.Rooms.Where(x => (x.RoomId ?? "").Equals(id)).ToListAsync();
+                rooms = await _context.Rooms.Where(x => (x.RoomId ?? "").Equals(id)).Include(y => y.XYZHotelId).ToListAsync();
                 if(rooms.Count <= 0)
                 {
                     AddResponse(false, "No Data Found",rooms);

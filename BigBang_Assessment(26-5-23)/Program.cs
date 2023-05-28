@@ -16,27 +16,18 @@ internal class Program
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
-
         builder.Services.AddScoped<IRepoXYZ, RepoXYZ>();
+        builder.Services.AddScoped<IRepoHotel, RepoHotel>();
         builder.Services.AddScoped<IRepoAddress, RepoAddress>();
         builder.Services.AddScoped<IRepoRooms, RepoRooms>();
+        builder.Services.AddScoped<IRepoRoles, RepoRoles>();
+        builder.Services.AddScoped<IRepoEmployee, RepoEmployee>();
 
         builder.Services.AddDbContext<XYZHotelDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("connection")));
 
         builder.Services.AddControllers().AddNewtonsoftJson(
                 options => options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
 
-
-        builder.Services.AddCors(options =>
-        {
-            options.AddPolicy("MyPolicy",
-                builder =>
-                {
-                    builder.AllowAnyOrigin()
-                           .AllowAnyMethod()
-                           .AllowAnyHeader();
-                });
-        });
 
         builder.Services.AddAuthentication(options =>
         {
@@ -58,15 +49,27 @@ internal class Program
                  };
              });
 
+        builder.Services.AddCors(options =>
+        {
+            options.AddPolicy("MyPolicy",
+                builder =>
+                {
+                    builder.AllowAnyOrigin()
+                           .AllowAnyMethod()
+                           .AllowAnyHeader();
+                });
+        });
 
         var app = builder.Build();
 
         // Configure the HTTP request pipeline.
+
         if (app.Environment.IsDevelopment())
         {
             app.UseSwagger();
             app.UseSwaggerUI();
         }
+
 
         app.UseHttpsRedirection();
 
@@ -77,7 +80,14 @@ internal class Program
 
         app.UseAuthorization();
 
-
+        app.Use(async (context, next) =>
+        {
+            if (context.User.Identity?.IsAuthenticated == true)
+            {
+                var user = context.User;
+            }
+            await next.Invoke();
+        });
 
         app.MapControllers();
 
