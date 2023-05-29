@@ -143,7 +143,8 @@ namespace BigBang_Assessment_26_5_23_.Repositories
             newRoom = new()
             {
                 RoomId = roomId,
-                XYZHotelId = hotel
+                XYZHotelId = hotel,
+                IsAvailable = true,
             };
         }
         

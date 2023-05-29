@@ -1,5 +1,6 @@
 ﻿using BigBang_Assessment_26_5_23_.Model_Request_Response_;
 using BigBang_Assessment_26_5_23_.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 
@@ -7,6 +8,7 @@ namespace BigBang_Assessment_26_5_23_.Controllers
 {
     [ApiController]
     [Route("[controller]/actions")]
+    [Authorize(Roles = "RID574")]
     public class RoomsController : Controller
     {
         private readonly IRepoRooms repoContext;

@@ -8,8 +8,6 @@
         public string? EmployeeDOB { get; set; }
         public string? EmployeeQualifications { get; set; }
         public string? Password { get; set; }
-        public string? HotelId { get; set; }
-        public string? RoleId { get; set; }
 
     }
 }

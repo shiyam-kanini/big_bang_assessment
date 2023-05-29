@@ -62,7 +62,7 @@ namespace BigBang_Assessment_26_5_23_.Repositories
                 return registerResponse;
             }            
         }
-        public async Task<Commonresponse> Login([System.Diagnostics.CodeAnalysis.NotNull] LoginRequest loginCredentials)
+        public async Task<Commonresponse> LoginUser([System.Diagnostics.CodeAnalysis.NotNull] LoginRequest loginCredentials)
         {
             Commonresponse loginResponse = new();
             try
@@ -74,12 +74,12 @@ namespace BigBang_Assessment_26_5_23_.Repositories
                     loginResponse.message = "User Not Found";
                     return loginResponse;
                 }
-                loginResponse.token = CreateToken(loginCredentials, "user");
                 Login_Logs newUser = new()
                 {
                     SessionId = $"SID{random.Next(0, 9)}{random.Next(0, 9)}{random.Next(0, 9)}",
                     LoginId = loginCredentials.UserId,
                 };
+                loginResponse.token = CreateToken(loginCredentials, "user");
                 await _context.Login_Logs.AddAsync(newUser);
                 await _context.SaveChangesAsync();
                 loginResponse.status = true;
@@ -93,7 +93,39 @@ namespace BigBang_Assessment_26_5_23_.Repositories
                 return loginResponse;
             }
         }
-        
+
+        public async Task<Commonresponse> LoginEmployee([System.Diagnostics.CodeAnalysis.NotNull] LoginRequest loginCredentials)
+        {
+            Commonresponse loginResponse = new();
+            try
+            {
+                Employees? isEmployeeExists = await _context.Employees.FindAsync(loginCredentials.UserId ?? "");
+                if (isEmployeeExists == null)
+                {
+                    loginResponse.status = false;
+                    loginResponse.message = "User Not Found";
+                    return loginResponse;
+                }
+                string employeeRole = await _context.Employee_XYZHotels.Where(x => x.Employees.EmployeeId.Equals(loginCredentials.UserId)).Select(x => x.Role.RoleId).FirstOrDefaultAsync();
+                loginResponse.token = CreateToken(loginCredentials, employeeRole ?? "");
+                Login_Logs newUser = new()
+                {
+                    SessionId = $"SID{random.Next(0, 9)}{random.Next(0, 9)}{random.Next(0, 9)}",
+                    LoginId = loginCredentials.UserId,
+                };
+                await _context.Login_Logs.AddAsync(newUser);
+                await _context.SaveChangesAsync();
+                loginResponse.status = true;
+                loginResponse.message = $"{newUser.LoginId}({employeeRole}) Logged in a session {newUser.SessionId}";
+                return loginResponse;
+            }
+            catch (Exception ex)
+            {
+                loginResponse.status = false;
+                loginResponse.message = ex.StackTrace;
+                return loginResponse;
+            }
+        }
 
         public void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordKey)
         {

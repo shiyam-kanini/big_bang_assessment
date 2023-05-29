@@ -7,5 +7,6 @@ namespace BigBang_Assessment_26_5_23_.Models
         [Key]
         public string? RoomId { get; set; }
         public XYZHotels? XYZHotelId { get; set; }
+        public bool? IsAvailable { get; set; }
     }
 }

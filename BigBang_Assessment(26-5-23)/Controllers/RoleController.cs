@@ -1,11 +1,15 @@
 ﻿using BigBang_Assessment_26_5_23_.Model_Request_Response_;
 using BigBang_Assessment_26_5_23_.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BigBang_Assessment_26_5_23_.Controllers
 {
     [ApiController]
     [Route("[Controller]/actions")]
+    [Authorize(Roles = "RID170")]
+
+
     public class RoleController : Controller
     {
 

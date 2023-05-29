@@ -24,7 +24,11 @@ namespace BigBang_Assessment_26_5_23_
             services.AddScoped<IRepoRooms, RepoRooms>();
             services.AddScoped<IRepoRoles, RepoRoles>();
             services.AddScoped<IRepoHotel, RepoHotel>();
-            services.AddScoped<IRepoEmployee, RepoEmployee>();  
+            services.AddScoped<IRepoEmployee, RepoEmployee>(); 
+            services.AddScoped<IRepoEmployeeXYZRole, RepoEmployeeXYZRole>();
+            services.AddScoped<IRepoUser, RepoUser>();
+
+
 
             services.AddDbContext<XYZHotelDbContext>(options =>
             options.UseSqlServer(Configuration.GetConnectionString("connection")));

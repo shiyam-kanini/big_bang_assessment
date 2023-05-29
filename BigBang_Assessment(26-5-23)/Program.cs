@@ -22,6 +22,10 @@ internal class Program
         builder.Services.AddScoped<IRepoRooms, RepoRooms>();
         builder.Services.AddScoped<IRepoRoles, RepoRoles>();
         builder.Services.AddScoped<IRepoEmployee, RepoEmployee>();
+        builder.Services.AddScoped<IRepoEmployeeXYZRole, RepoEmployeeXYZRole>();
+        builder.Services.AddScoped<IRepoUser, RepoUser>();
+
+
 
         builder.Services.AddDbContext<XYZHotelDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("connection")));
 

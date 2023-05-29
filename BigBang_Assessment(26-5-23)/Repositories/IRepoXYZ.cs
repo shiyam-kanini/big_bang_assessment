@@ -8,7 +8,9 @@ namespace BigBang_Assessment_26_5_23_.Repositories
     {
         void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordKey);
         Task<Commonresponse> Register(RegisterModel loginCredentials);
-        Task<Commonresponse> Login(LoginRequest loginCredentials);
+        Task<Commonresponse> LoginUser(LoginRequest loginCredentials);
+        Task<Commonresponse> LoginEmployee(LoginRequest loginCredentials);
+
         string CreateToken(LoginRequest loginCredentials, string role);
         
 

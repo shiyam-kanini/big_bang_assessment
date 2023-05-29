@@ -14,5 +14,6 @@ namespace BigBang_Assessment_26_5_23_.Models
         public DbSet<Rooms> Rooms { get; set; }
         public DbSet<Login_Logs> Login_Logs { get; set; }
         public DbSet<Role> Role { get; set; }
+        public DbSet<Booking> Bookings { get; set; }
     }
 }

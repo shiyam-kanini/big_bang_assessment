@@ -25,7 +25,7 @@ namespace BigBang_Assessment_26_5_23_.Repositories
                 if (newHotel != null)
                 {
                     hotels.Add(newHotel);
-                    AddResponse(false, $"Hotel {id} not found", hotels);
+                    AddResponse(true, $"Hotel {id} not found", hotels);
                     return hotelResponse;
                 }
                 await _context.Rooms.Where(x => (x.RoomId != null ? x.RoomId : "").Equals(id)).ExecuteDeleteAsync();
@@ -48,7 +48,7 @@ namespace BigBang_Assessment_26_5_23_.Repositories
                 newHotel = await _context.Hotels.FindAsync(id != null ? id : "");
                 if (newHotel == null)
                 {
-                    AddResponse(false, "Hotel Doesn't exists", hotels);
+                    AddResponse(true, "Hotel Doesn't exists", hotels);
                     return hotelResponse;
                 }
                 AddHotel(id ?? "", hotelName);
@@ -73,7 +73,7 @@ namespace BigBang_Assessment_26_5_23_.Repositories
                 hotels = await _context.Hotels.Include(y => y.HotelAddresses).Include(z => z.Employee_XYZHotels).Include(a => a.Rooms).ToListAsync();
                 if (hotels.Count <= 0)
                 {
-                    AddResponse(false, "No Data Found", hotels);
+                    AddResponse(true, "No Data Found", hotels);
                     return hotelResponse;
                 }
                 AddResponse(true, $"{hotels.Count} Records Found", hotels);
@@ -93,7 +93,7 @@ namespace BigBang_Assessment_26_5_23_.Repositories
                 hotels = await _context.Hotels.Where(x => (x.HotelId ?? "").Equals(id)).Include(y => y.HotelAddresses).Include(z => z.Employee_XYZHotels).Include(a => a.Rooms).ToListAsync();
                 if (hotels.Count <= 0)
                 {
-                    AddResponse(false, $"No Hotel Found with id - {id}", hotels);
+                    AddResponse(true, $"No Hotel Found with id - {id}", hotels);
                     return hotelResponse;
                 }
                 AddResponse(true, $"{hotels.Count} records Found", hotels);
@@ -113,7 +113,7 @@ namespace BigBang_Assessment_26_5_23_.Repositories
                 newHotel = await _context.Hotels.Where(x => (x.HotelName ?? "").Equals(hotelName)).FirstOrDefaultAsync();
                 if (newHotel != null)
                 {
-                    AddResponse(false, "Hotel Already exists", hotels);
+                    AddResponse(true, "Hotel Already exists", hotels);
                     return hotelResponse;
                 }
                 AddHotel($"XYZ{random.Next(0, 9)}", hotelName);
