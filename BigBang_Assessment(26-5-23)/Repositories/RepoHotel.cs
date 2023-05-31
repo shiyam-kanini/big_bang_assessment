@@ -36,7 +36,7 @@ namespace BigBang_Assessment_26_5_23_.Repositories
             }
             catch (Exception ex)
             {
-                AddResponse(false, ex.StackTrace, hotels);
+                AddResponse(false, ex.Message, hotels);
                 return hotelResponse;
             }
         }

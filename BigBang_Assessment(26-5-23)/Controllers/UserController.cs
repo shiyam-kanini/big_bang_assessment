@@ -22,9 +22,16 @@ namespace BigBang_Assessment_26_5_23_.Controllers
         }
         [HttpGet]
         [Route("Get-Rooms_count")]
+        [AllowAnonymous]
         public  async Task<int> GetRoomsCount(string hotelId)
         {
             return await repoContext.GetRoomsCount(hotelId);
+        }
+        [HttpGet]
+        [Route("Get-By-BookingIId")]
+        public async Task<BookingResponse> GetBookingById(string bookingId)
+        {
+            return await repoContext.GetBookingStatus(bookingId);
         }
     }
 }

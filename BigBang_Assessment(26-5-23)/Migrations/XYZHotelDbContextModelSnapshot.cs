@@ -210,9 +210,11 @@ namespace BigBang_Assessment_26_5_23_.Migrations
 
             modelBuilder.Entity("BigBang_Assessment_26_5_23_.Models.Booking", b =>
                 {
-                    b.HasOne("BigBang_Assessment_26_5_23_.Models.User", null)
+                    b.HasOne("BigBang_Assessment_26_5_23_.Models.User", "UserId")
                         .WithMany("Bookings")
                         .HasForeignKey("UserId1");
+
+                    b.Navigation("UserId");
                 });
 
             modelBuilder.Entity("BigBang_Assessment_26_5_23_.Models.Employee_XYZHotels", b =>

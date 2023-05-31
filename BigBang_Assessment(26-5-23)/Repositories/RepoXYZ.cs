@@ -21,6 +21,8 @@ namespace BigBang_Assessment_26_5_23_.Repositories
         private readonly Random random = new();
         private readonly XYZHotelDbContext _context;
         private readonly IConfiguration Configuration;
+        byte[] passwordHash;
+        byte[] passwordSalt;
         public RepoXYZ(XYZHotelDbContext context, IConfiguration configuration)
         {
             _context = context;
@@ -31,8 +33,7 @@ namespace BigBang_Assessment_26_5_23_.Repositories
             Commonresponse registerResponse = new();
             try
             {
-                byte[] passwordHash;
-                byte[] passwordSalt;
+                
                 CreatePasswordHash(loginCredentials.Password ?? "", out passwordHash, out passwordSalt);
                 User? isUserExists = await _context.Users.Where(name => (name.UserName ?? "") == (loginCredentials.UserName ?? "")).FirstOrDefaultAsync();
                 if (isUserExists != null)
@@ -74,6 +75,12 @@ namespace BigBang_Assessment_26_5_23_.Repositories
                     loginResponse.message = "User Not Found";
                     return loginResponse;
                 }
+                if (!VerifyPassword(loginCredentials.Password, isUserExists.UserPasswordHash, isUserExists.UserPasswordSalt))
+                {
+                    loginResponse.status = false;
+                    loginResponse.message = "Passwords Dont Match";
+                    return loginResponse;
+                }
                 Login_Logs newUser = new()
                 {
                     SessionId = $"SID{random.Next(0, 9)}{random.Next(0, 9)}{random.Next(0, 9)}",
@@ -89,7 +96,7 @@ namespace BigBang_Assessment_26_5_23_.Repositories
             catch (Exception ex)
             {
                 loginResponse.status = false;
-                loginResponse.message = ex.StackTrace;
+                loginResponse.message = ex.Message;
                 return loginResponse;
             }
         }
@@ -113,6 +120,12 @@ namespace BigBang_Assessment_26_5_23_.Repositories
                     SessionId = $"SID{random.Next(0, 9)}{random.Next(0, 9)}{random.Next(0, 9)}",
                     LoginId = loginCredentials.UserId,
                 };
+                if(!VerifyPassword(loginCredentials.Password, isEmployeeExists.EmployeePasswordHash, isEmployeeExists.EmployeePasswordSalt))
+                {
+                    loginResponse.status = false;
+                    loginResponse.message = "Passwords Dont Match";
+                    return loginResponse;
+                }
                 await _context.Login_Logs.AddAsync(newUser);
                 await _context.SaveChangesAsync();
                 loginResponse.status = true;
@@ -122,10 +135,29 @@ namespace BigBang_Assessment_26_5_23_.Repositories
             catch (Exception ex)
             {
                 loginResponse.status = false;
-                loginResponse.message = ex.StackTrace;
+                loginResponse.message = ex.Message;
                 return loginResponse;
             }
         }
+
+        public bool VerifyPassword(string password, byte[] storedHash, byte[] storedSalt)
+        {
+            using (var hmac = new HMACSHA512(storedSalt))
+            {
+                byte[] computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
+
+                for (int i = 0; i < computedHash.Length; i++)
+                {
+                    if (computedHash[i] != storedHash[i])
+                    {                        
+                        return false; 
+                    }
+                }
+
+                return true; 
+            }
+        }
+
 
         public void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordKey)
         {
